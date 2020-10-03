@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">MadLevel4Task2</string>
+    <string name="welcome">welcome</string>
+    <string name="instructions">instructions: select rock, paper or scissors to play</string>
+    <string name="all_time_statistics">all time statistics</string>
+    <string name="computer">computer</string>
+    <string name="you">you</string>
+    <string name="v_s">VS</string>
+</resources>
