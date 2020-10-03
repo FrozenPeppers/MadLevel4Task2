@@ -1,6 +1,10 @@
 package com.example.madlevel4task2
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import com.example.madlevel4task2.model.Game
 import com.example.madlevel4task2.repository.GameRepository
@@ -12,6 +16,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.*
 
+const val HISTORY_CLEAR_CODE = 100
+
 class MainActivity : AppCompatActivity() {
 
     private lateinit var gameRepository: GameRepository
@@ -19,19 +25,18 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        setSupportActionBar(toolbar)
 
         gameRepository = GameRepository(this)
-
         initViews()
     }
 
-    private fun initViews(){
+    private fun initViews() {
         ivRock.setOnClickListener { playGame(Game.Choice.ROCK) }
         ivPaper.setOnClickListener { playGame(Game.Choice.PAPER) }
         ivScissors.setOnClickListener { playGame(Game.Choice.SCISSORS) }
         getStatisticsFromDatabase()
     }
-
 
     private fun playGame(playerChoice: Game.Choice) {
         val computerChoice = Game.Choice.values()[(Game.Choice.values().indices).random()]
@@ -45,7 +50,6 @@ class MainActivity : AppCompatActivity() {
         addGameToDatabase(game)
     }
 
-
     private fun displayGame(game: Game) {
         ivComputer.setImageDrawable(getDrawable(game.computerChoice))
         ivYou.setImageDrawable(getDrawable(game.playerChoice))
@@ -57,7 +61,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
     private fun getDrawableId(choice: Game.Choice): Int {
         return when (choice) {
             Game.Choice.ROCK -> R.drawable.rock
@@ -66,15 +69,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
     private fun getResult(playerChoice: Game.Choice, computerChoice: Game.Choice): Game.Result? {
-        return Game.Result.values().associateBy(Game.Result::value)[ChoiceComparator()
-            .compare(
+        return Game.Result.values().associateBy(Game.Result::value)[ChoiceComparator().compare(
             playerChoice,
             computerChoice
         )]
     }
-
 
     private fun addGameToDatabase(game: Game) {
         CoroutineScope(Dispatchers.Main).launch {
@@ -84,7 +84,6 @@ class MainActivity : AppCompatActivity() {
             getStatisticsFromDatabase()
         }
     }
-
 
     private fun getStatisticsFromDatabase() {
         CoroutineScope(Dispatchers.Main).launch {
@@ -97,6 +96,36 @@ class MainActivity : AppCompatActivity() {
                 losses = gameRepository.getNumberOfLosses()
             }
             tvStatistics.text = getString(R.string.statistics, wins, draws, losses)
+        }
+    }
+
+    private fun startHistoryActivity() {
+        startActivityForResult(Intent(this, GameHistoryActivity::class.java), HISTORY_CLEAR_CODE)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode == Activity.RESULT_OK) {
+            when (requestCode) {
+                HISTORY_CLEAR_CODE -> {
+                    getStatisticsFromDatabase()
+                }
+            }
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_main, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_open_history -> {
+                startHistoryActivity()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
         }
     }
 
