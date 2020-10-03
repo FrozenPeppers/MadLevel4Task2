@@ -9,4 +9,5 @@
     <string name="you_lose">computer wins</string>
     <string name="draw">draw</string>
     <string name="you_win">you win!</string>
+    <string name="statistics">Win: %d  Draw: %d  Lose: %d</string>
 </resources>
